@@ -1,0 +1,26 @@
+spring:
+  cloud:
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedHeaders: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+			  
+      routes:
+        - id: zyn1724063370856Ms1-route
+          uri: http://localhost:8037/
+          predicates:
+            - Path=/api/zyn1724063370856Ms1/**
+        - id: zyn1724063370856Ms2-route
+          uri: http://localhost:8038/
+          predicates:
+            - Path=/api/zyn1724063370856Ms2/**
+
+
+

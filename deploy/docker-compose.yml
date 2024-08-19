@@ -1,0 +1,141 @@
+version: '3'
+# in visuale studio code "ctrl + shift + p " then use this "Convert Indentation to Spaces" : formatage
+services:
+
+  gateway-service:
+    build: ../gateway
+    container_name: gateway-service
+    ports:
+      - '${GATE_WAY_PORT}:${GATE_WAY_PORT}'
+    expose:
+      - '${GATE_WAY_PORT}'
+
+    networks:
+      - app-network
+
+
+  front-end:
+    build: ../frontend
+    container_name: frontend
+    ports:
+      - '${FRONT_END_PORT}:80'
+    expose:
+      - '${FRONT_END_PORT}'
+    networks:
+      - app-network
+    restart: always
+	  
+
+  zyn1724063370856Ms1-db:
+    image: ${ZYN1724063370856MS1_DB_IMAGE_NAME}
+    container_name: ${ZYN1724063370856MS1_DB_CONTAINER_NAME}
+    volumes:
+      - zyn1724063370856Ms1-data:/var/lib/mysql
+    ports:
+      - "${ZYN1724063370856MS1_DB_PORT}:${ZYN1724063370856MS1_DB_PORT}"
+    environment:
+      - MYSQL_DATABASE=${ZYN1724063370856MS1_DB_NAME}
+      - MYSQL_USER=${ZYN1724063370856MS1_DB_USER}
+      - MYSQL_PASSWORD=${ZYN1724063370856MS1_DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${ZYN1724063370856MS1_DB_PASSWORD_ROOT}
+    networks:
+      - app-network
+
+    phpmyadmin-zyn1724063370856Ms1:
+        image: phpmyadmin/phpmyadmin
+        environment:
+          PMA_HOST: ${ZYN1724063370856MS1_DB_CONTAINER_NAME}
+          MYSQL_ROOT_PASSWORD: ''
+        ports:
+          - "8 081:80"
+        depends_on:
+          - zyn1724063370856Ms1-db
+        networks:
+          - app-network
+		  
+  zyn1724063370856Ms1-back:
+    build:
+	  context: ${ZYN1724063370856MS1_PROJECT_PATH}
+      dockerfile: DockerfileWithPackage
+    container_name: ${ZYN1724063370856MS1_CONTAINER_NAME}
+    image: ${ZYN1724063370856MS1_IMAGE_NAME}
+    ports:
+      - "${ZYN1724063370856MS1_BACK_PORT}:${ZYN1724063370856MS1_BACK_PORT}"
+    environment:
+      - ZYN1724063370856MS1_DB_URL=${ZYN1724063370856MS1_DB_URL}
+      - ZYN1724063370856MS1_DB_USER=${ZYN1724063370856MS1_DB_USER}
+      - ZYN1724063370856MS1_DB_PASSWORD=${ZYN1724063370856MS1_DB_PASSWORD}
+    depends_on:
+      - zyn1724063370856Ms1-db
+    networks:
+      - app-network
+
+  zyn1724063370856Ms2-db:
+    image: ${ZYN1724063370856MS2_DB_IMAGE_NAME}
+    container_name: ${ZYN1724063370856MS2_DB_CONTAINER_NAME}
+    volumes:
+      - zyn1724063370856Ms2-data:/var/lib/mysql
+    ports:
+      - "${ZYN1724063370856MS2_DB_PORT}:${ZYN1724063370856MS2_DB_PORT}"
+    environment:
+      - MYSQL_DATABASE=${ZYN1724063370856MS2_DB_NAME}
+      - MYSQL_USER=${ZYN1724063370856MS2_DB_USER}
+      - MYSQL_PASSWORD=${ZYN1724063370856MS2_DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${ZYN1724063370856MS2_DB_PASSWORD_ROOT}
+    networks:
+      - app-network
+
+    phpmyadmin-zyn1724063370856Ms2:
+        image: phpmyadmin/phpmyadmin
+        environment:
+          PMA_HOST: ${ZYN1724063370856MS2_DB_CONTAINER_NAME}
+          MYSQL_ROOT_PASSWORD: ''
+        ports:
+          - "8 082:80"
+        depends_on:
+          - zyn1724063370856Ms2-db
+        networks:
+          - app-network
+		  
+  zyn1724063370856Ms2-back:
+    build:
+	  context: ${ZYN1724063370856MS2_PROJECT_PATH}
+      dockerfile: DockerfileWithPackage
+    container_name: ${ZYN1724063370856MS2_CONTAINER_NAME}
+    image: ${ZYN1724063370856MS2_IMAGE_NAME}
+    ports:
+      - "${ZYN1724063370856MS2_BACK_PORT}:${ZYN1724063370856MS2_BACK_PORT}"
+    environment:
+      - ZYN1724063370856MS2_DB_URL=${ZYN1724063370856MS2_DB_URL}
+      - ZYN1724063370856MS2_DB_USER=${ZYN1724063370856MS2_DB_USER}
+      - ZYN1724063370856MS2_DB_PASSWORD=${ZYN1724063370856MS2_DB_PASSWORD}
+    depends_on:
+      - zyn1724063370856Ms2-db
+    networks:
+      - app-network
+
+
+  minio:
+    image: ${MINIO_IMAGE_NAME}
+    container_name: ${MINIO_CONTAINER_NAME}
+    restart: always
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - ./data/minio_data:/data
+    ports:
+      - "${MINIO_HOME_PORT}:9000"
+      - "${MINIO_URL_PORT}:9001" # tap localhost:9001 to access to minio
+    networks:
+      - app-network
+
+
+volumes:
+  zyn1724063370856Ms1-data:
+  zyn1724063370856Ms2-data:
+
+networks:
+  app-network:
+    external: true
